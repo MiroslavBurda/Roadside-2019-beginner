@@ -12,6 +12,9 @@
 
 #include "ini.h"
 #include "function.h"
+
+using namespace rb;
+
 bool kalibrace(); // definice dole pod hlavnim programem
 void start();
 
@@ -40,7 +43,16 @@ void setup() {
         Serial.println("!!! Bluetooth work!");
     }
     Serial.print ("Starting...\n");
-    rbc();
+
+    rbc().install(rb::MAN_DISABLE_BATTERY_MANAGEMENT | rb::MAN_DISABLE_MOTOR_FAILSAFE);
+    rbc().initSmartServoBus(2, UART_NUM_2, GPIO_NUM_14); // pin IO14 by default
+
+    // ID je tady od 0, ale HW je od 1!
+    rbc().servoBus().limit(0, 0_deg, 240_deg); // ID, minimalni, maximalni hodnota - toto se nastavuje pouze jednou
+
+    rbc().servoBus().set(0, 120_deg, 150); // ID, cilova poloha, rychlost, [zrychleni a zpomaleni na zacatku a konci pohybu, 1.f toto vypina]
+
+
     Serial.print ("RBC initialized\n");
     auto& batt = rbc().battery();
     batt.setCoef(100.0);  // toto musí být napevno, aby si cip nemyslel, ze je nizke napeti na baterce, toto napeti se musi kontrolovat rucne  

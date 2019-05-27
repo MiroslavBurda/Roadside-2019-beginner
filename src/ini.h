@@ -31,8 +31,7 @@ struct Driven {
 
 rb::Manager& rbc() 
 {
-    static rb::Manager m(false,false);  // ve výchozím stavu se motory po puštění tlačítka vypínají, false zařídí, že pojedou, dokud nedostanou další pokyn 
-    return m;
+   return rb::Manager::get();
 }
 
 bool sw1() { return !rbc().expander().digitalRead(rb::SW1); }
