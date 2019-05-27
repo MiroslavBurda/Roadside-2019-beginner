@@ -1,0 +1,132 @@
+
+    // rbc().schedule(100, casovac1); // je volaný každých 500 ms  
+
+     if (send_data) {
+        send_data.ack();
+        if (L_G_light) L_G_light = false; else  L_G_light = true;
+        rbc().leds().green(L_G_light);
+        // Serial.print(!digitalRead(17)); Serial.print("  ");
+        // Serial.print(!digitalRead(18)); Serial.print("  ");
+        // Serial.print(!digitalRead(5)); Serial.print("  ");
+        // Serial.print(analogRead(27)); Serial.print("  ");
+         SerialBT.println (millis());
+        // Serial.println(left_enc);
+        Serial1.write("a");
+
+        Serial.print(rbc().motor(LEFT_MOTOR)->encoder()->value()); // cteni enkoderu
+        Serial.print('\t');
+        Serial.println(rbc().motor(RIGHT_MOTOR)->encoder()->value());
+    }
+
+if(Serial1.available()) {
+        char c = Serial1.read();
+        Serial.write(c); 
+
+
+        rb::Manager& rbc() 
+{
+    static rb::Manager m(false, false);  // ve výchozím stavu se motory po puštění tlačítka vypínají, false zařídí, že pojedou, dokud nedostanou další pokyn 
+    return m;                            // druhe false vypina kontrolu baterky pres pin 34 a vypinani pohonu a cipu pri nizkem napeti     
+}
+
+Stream* serial = nullptr;  // pouziva se, kdyz se prohazuje Serial a SerialBT 
+
+
+        // qrd[0] = analogRead(36)/4;
+        // qrd[1] = analogRead(39)/4;
+        // qrd[2] = analogRead(34)/4;
+        // qrd[3] = analogRead(35)/4;
+        // qrd[4] = analogRead(32)/4;
+
+        // qrd[5] = analogRead(33)/4;
+        // qrd[6] = analogRead(25)/4;
+        // qrd[7] = analogRead(26)/4;
+        // qrd[8] = analogRead(27)/4;
+        // qrd[9] = analogRead(14)/4;
+
+        // qrd[10] = analogRead(12)/4;
+        // qrd[11] = analogRead(13)/4;
+
+   // Serial.print(qrd[0]); Serial.print("  "); // INPUT je zaply implicitne, pull up nepotrebuju, protoze je odpor na desce se senzory 
+        // Serial.print(qrd[1]); Serial.print("  "); // zadni lista
+        // Serial.print(qrd[2]); Serial.print("  ");
+        // Serial.print(qrd[3]); Serial.print("  ");
+        // Serial.print(qrd[4]); Serial.print("  "); 
+
+        // Serial.print(qrd[5]); Serial.print("  ");  // predni lista 
+        // Serial.print(qrd[6]); Serial.print("  "); 
+        // Serial.print(qrd[7]); Serial.print("  ");
+        // Serial.print(qrd[8]); Serial.print("  ");
+        // Serial.print(qrd[9]); Serial.print("  "); 
+
+        // Serial.print(qrd[10]); Serial.print("  "); // stred vpravo 
+        // Serial.print(qrd[11]); Serial.print("  "); // stred vlevo 
+
+                // Serial1.write(qrd[0]);
+        // Serial1.write(qrd[1]);
+        // Serial1.write(qrd[2]);
+        // Serial1.write(qrd[3]);
+        // Serial1.write(qrd[4]);
+
+        // Serial1.write(qrd[5]);
+        // Serial1.write(qrd[6]);
+        // Serial1.write(qrd[7]);
+        // Serial1.write(qrd[8]);
+        // Serial1.write(qrd[9]);
+
+        // Serial1.write(qrd[10]);
+        // Serial1.write(qrd[11]);
+
+        // Serial.print(c); 
+        // Serial.print ("  ");
+        // Serial.println (millis());
+
+
+  // Serial.print(!digitalRead(17)); Serial.print("  ");
+        // Serial.print(!digitalRead(18)); Serial.print("  ");
+        // Serial.print(!digitalRead(5)); Serial.print("  ");
+        // Serial.print(analogRead(27)); Serial.print("  ");	
+        // SerialBT.println (millis());
+        // Serial.println(left_enc);
+        //Serial1.write("a");
+
+            // qrd[0] = Serial1.read();
+    // qrd[1] = Serial1.read();
+    // qrd[2] = Serial1.read();
+    // qrd[3] = Serial1.read();
+    // qrd[4] = Serial1.read();
+
+    // qrd[5] = Serial1.read();
+    // qrd[6] = Serial1.read();
+    // qrd[7] = Serial1.read();
+    // qrd[8] = Serial1.read();
+    // qrd[9] = Serial1.read();
+
+    // qrd[10] = Serial1.read();
+    // qrd[11] = Serial1.read();
+
+
+
+
+    bool kontrola = read_qrd();
+        for(byte b = 0; b<12; b++) printf("#%u: %u ",b, qrd[b]); 
+        printf("  %s  %lu \n", kontrola ? "OK" : "Chyba", millis());
+
+
+        // Serial.print(rbc().motor(LEFT_MOTOR)->encoder()->value()); // cteni enkoderu
+        // Serial.print('\t');
+        // Serial.println(rbc().motor(RIGHT_MOTOR)->encoder()->value());
+        
+#if !defined(SerialBT) 
+BluetoothSerial SerialBT;
+#endif
+
+a.ok = ( ( ((levy >= 0) and (a.left_enc < 2)) or  ((levy <= 0) and (a.left_enc > 2)) ) and 
+                 ( ((pravy >= 0) and (a.right_enc < 2)) or  ((pravy <= 0) and (a.right_enc > 2)) ) ) ? true : false ;
+
+                 // if (!rbc().expander().digitalRead(rb::POWER_OFF_EXPANDER)); {
+    //     Serial.println("***************** DESKA JE VYPNUTA !!!!!! ************************");
+    //     Serial.println("***************** DESKA JE VYPNUTA !!!!!! ************************");
+    //     SerialBT.println("***************** DESKA JE VYPNUTA !!!!!! ************************");
+    //     SerialBT.println("***************** DESKA JE VYPNUTA !!!!!! ************************");
+    // }    
