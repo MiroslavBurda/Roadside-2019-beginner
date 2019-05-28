@@ -13,6 +13,15 @@ std::atomic_bool end_R;
 
 Servo servo; 
 
+int stav_0 = 80;
+int stav_1 = 120;
+int axis[7] = {5,6,7,8,9,10,11};
+byte btn[8] = {0,0,0,0,0,0,0,0};
+byte btn_last[8] = {0,0,0,0,0,0,0,0};
+int speed_coef = -100; // nasobeni hodnoty, co leze z joysticku
+int diff_coef = 1; // o kolik jede jeden motor rychleji nez druhy 
+
+
 int servo_open = 100;
 int servo_close = 180;
 int position_servo = 100; // pro postupne krokovani serva pro kalibraci 
@@ -29,9 +38,16 @@ struct Driven {
     bool ok;
 };
 
-rb::Manager& rbc() 
+
+// rb::Manager& rbc() 
+// {
+//    return rb::Manager::get();
+// }
+
+rb::Manager& rbc()
 {
-   return rb::Manager::get();
+    static rb::Manager m(false,false);  // ve výchozím stavu se motory po puštění tlačítka vypínají, false zařídí, že pojedou, dokud nedostanou další pokyn
+    return m;
 }
 
 bool sw1() { return !rbc().expander().digitalRead(rb::SW1); }

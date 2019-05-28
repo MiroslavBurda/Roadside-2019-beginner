@@ -1,5 +1,3 @@
-// GY-652 - magnetometr lepsi,   dalsi je GY 531
-
 #include <Arduino.h>
 #include "RBControl_manager.hpp"
 #include <Servo.h>
@@ -17,6 +15,9 @@ using namespace rb;
 
 bool kalibrace(); // definice dole pod hlavnim programem
 void start();
+void testovani_serv();
+void testovani_motoru();
+bool read_joystick(); 
 
 
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
@@ -26,12 +27,10 @@ void start();
 BluetoothSerial SerialBT;
 Stream* serial = nullptr;
 
-
-
 void setup() {
     Serial.begin (1000000); 
     Serial1.begin(1000000, SERIAL_8N1, 16, 17, false, 2000000UL ); // trida HardwareSerial (speed, config, Rx, Tx, invert, timeout )
-    if (!SerialBT.begin("RBControl")) //Bluetooth device name
+    if (!SerialBT.begin("K2_robot")) //Bluetooth device name - na pocitaci Burda COM 9
     {
         Serial.println("!!! Bluetooth initialization failed!");
         serial = &Serial;
@@ -44,13 +43,20 @@ void setup() {
     }
     Serial.print ("Starting...\n");
 
-    rbc().install(rb::MAN_DISABLE_BATTERY_MANAGEMENT | rb::MAN_DISABLE_MOTOR_FAILSAFE);
-    rbc().initSmartServoBus(2, UART_NUM_2, GPIO_NUM_14); // pin IO14 by default
+    // rbc().install(rb::MAN_DISABLE_BATTERY_MANAGEMENT | rb::MAN_DISABLE_MOTOR_FAILSAFE);
+    rbc().initSmartServoBus(2, UART_NUM_2, GPIO_NUM_32); 
+    // pocet serv (MUSI byt spravne), cislo  hardwarove seriove linky, pin, na kterém jsou serva připojena (všechna na jednom) IO14 by default
+    // ID je tady od 0, ale HW je od 1! - toto Hadrwarove ID se musi nastavit specialni destickou - pouze jednou 
+    // rbc().servoBus().limit(0, 0_deg, 240_deg); // ID, minimalni, maximalni hodnota - toto se nastavuje pouze jednou
+    // rbc().servoBus().set(0, 120_deg, 150); // ID, cilova poloha, rychlost, [zrychleni a zpomaleni na zacatku a konci pohybu, 1.f toto vypina]
+//**********************************************
+    // rbc().servoBus().limit(0, 25_deg, 130_deg); // stav 0 = 25/130
+    // rbc().servoBus().limit(1, 80_deg, 180_deg); // stav 1 = 180/80
+    // rbc().servoBus().set(0, 80, 150.f, 1.5f);
+    // rbc().servoBus().set(1, 120, 80.f, 1.5f);
 
-    // ID je tady od 0, ale HW je od 1!
-    rbc().servoBus().limit(0, 0_deg, 240_deg); // ID, minimalni, maximalni hodnota - toto se nastavuje pouze jednou
-
-    rbc().servoBus().set(0, 120_deg, 150); // ID, cilova poloha, rychlost, [zrychleni a zpomaleni na zacatku a konci pohybu, 1.f toto vypina]
+    //rbc().servoBus().limit(0, Angle::deg(25), Angle::deg(130)); // stav 0 = 25/130
+    //rbc().servoBus().limit(1, Angle::deg(80), Angle::deg(180)); // stav 1 = 180/80
 
 
     Serial.print ("RBC initialized\n");
@@ -86,14 +92,14 @@ void setup() {
     Serial.print('\t');
     Serial.println(rbc().motor(RIGHT_MOTOR)->encoder()->value());
     
-    start();
+    //start(); - testovaci jizda pro autonoma 
 }
     
 timeout send_data { msec(500) }; // timeout zajistuje posilani dat do PC kazdych 500 ms
 
 void loop() 
 {
-    rbc().leds().yellow(sw1()); // rucni zapinani zlute ledky 
+    rbc().leds().yellow(sw1()); // rucni zapinani zlute ledky - testovani odezvy desky 
     if (send_data) {
         send_data.ack();
         if (L_G_light) L_G_light = false; else  L_G_light = true;
@@ -104,89 +110,26 @@ void loop()
         // Serial.println(rbc().motor(RIGHT_MOTOR)->encoder()->value());
 
     }
+  //  testovani_serv();
+ //   testovani_motoru();
 
-    if(Serial.available()) {
-        char c = Serial.read();
-        switch(c) {
-            case 't':
-                if (position_servo >= 5)  position_servo = position_servo -5;               
-                servo.write(position_servo);
-                Serial.write(" 0: "); 
-                Serial.print(position_servo);
-                break;
-            case 'u':
-                if (position_servo <= 175)  position_servo = position_servo +5;               
-                servo.write(position_servo);
-                Serial.write(" 0: "); 
-                Serial.print(position_servo);
-                break;
-            case '+':
-                ++power_motor;
-                Serial.println(power_motor);
-                break;
-            case '-':
-                --power_motor;
-                Serial.println(power_motor);
-                break;
-            case 'w':
-                rbc().setMotors().power(LEFT_MOTOR, power_motor)
-                                 .power(RIGHT_MOTOR, power_motor)
-                                 .set();
-                break;
-            case 's':
-                rbc().setMotors().power(LEFT_MOTOR, -power_motor)
-                                 .power(RIGHT_MOTOR, -power_motor)
-                                 .set();
-                break;
-            case 'a':
-                rbc().setMotors().power(LEFT_MOTOR, -power_motor)
-                                 .power(RIGHT_MOTOR, power_motor)
-                                 .set();
-                break;
-            case 'd':
-                rbc().setMotors().power(LEFT_MOTOR, power_motor)
-                                 .power(RIGHT_MOTOR, -power_motor)
-                                 .set();
-                break;
-            case '*':
-                c = '0' + 10;
-            case '0' ... '9':
-                power_motor = (c - '0') * 10;
-                Serial.println(power_motor);
-                break;
-                rbc().motor(LEFT_MOTOR)->drive(otacka * (c - '0'), 64, nullptr);
-                rbc().motor(RIGHT_MOTOR)->drive(otacka * (c - '0'), 64, nullptr); //  tik; na otacku 
-                break;
-
-            // case 'l':
-            //     rbc().motor(RIGHT_MOTOR)->drive(otacka, 45, nullptr); //  tik; na otacku 
-            //     break;
-            // case 'p':
-            //     rbc().motor(LEFT_MOTOR)->drive(otacka, 45, nullptr);
-            //     break;
-
-            case ' ':
-                rbc().setMotors().stop(LEFT_MOTOR)
-                                 .stop(RIGHT_MOTOR)
-                                 .set();
-                break; 
-
-            case 'i': vpred(1);
-                break;
-            case 'k': vpravo(1);
-                break;
-            case 'm': vpred(-1);
-                break;
-            case 'j': vlevo(1);
-                break;
-            case 'p': vpravo_na_miste(1);
-                break;
-                
-            default:
-                Serial.write(c);
-                break;
-        } 
+    if ( read_joystick() )
+    {
+        float axis_0 = (abs(axis[0]) < 1) ? 0 : axis[0] /128.0; 
+        axis_0 = axis_0*axis_0*axis_0;
+        float axis_1 = (abs(axis[1]) < 1) ? 0 : axis[1] /128.0; 
+        axis_1 = axis_1*axis_1*axis_1;
+        int levy_m = (axis_1- (axis_0 /2 )) * speed_coef;
+        int pravy_m = (axis_1+ (axis_0 /2 )) * speed_coef;
+        printf(" %i %i \n ", levy_m, pravy_m );
+        rbc().setMotors().power(LEFT_MOTOR, levy_m)
+                         .power(RIGHT_MOTOR, pravy_m)
+                         .set();
+        
+        SerialBT.print(levy_m); SerialBT.print(" "); SerialBT.println(pravy_m);
     }
+    delay(10);
+ 
 }
 // ************************ definice, ktere jinde nefunguji 
 
@@ -271,5 +214,172 @@ void start()
      
 
     // chybi zastaveni pri konci hry 
+
+}
+
+// ********************************************************************
+
+bool read_joystick()
+{
+    if ( SerialBT.available() == 0 )
+        return false;
+
+    int test = SerialBT.read();
+    if (test == 0x80)
+    {
+        int axis_count = SerialBT.read();
+        for (int x = 0; x < axis_count; x++)
+        {
+            while(SerialBT.available() < 1)
+            {
+                // DO NOTHING - WAITING FOR PACKET
+                delay(1);
+            }
+
+            int8_t tmp = SerialBT.read();
+            axis[x] = tmp;
+            Serial.print(x);  
+            Serial.print(": ");
+            Serial.print(axis[x], DEC);
+            Serial.print(" ");
+            SerialBT.print(x);
+            SerialBT.print(": ");
+            SerialBT.print(axis[x], DEC);
+            SerialBT.print(" ");
+
+        }
+        return true;
+    }
+    else if  ( test == 0x81 )
+    {
+        while(SerialBT.available() < 1) {
+            // DO NOTHING - WAITING FOR PACKET
+            delay(1);
+        }
+        byte a = SerialBT.read();
+        while(SerialBT.available() < 1) {
+            // DO NOTHING - WAITING FOR PACKET
+            delay(1);
+        }
+        btn_last[a] = btn[a];
+        btn[a] = SerialBT.read();
+        Serial.print(a, DEC); Serial.print(": "); Serial.print(btn[a], DEC); Serial.print("last: "); Serial.print(btn_last[a], DEC);
+        return true;
+    }
+    return false;
+}
+//******************************************
+void testovani_serv()
+{
+
+     if(Serial.available()) {
+        char c = Serial.read();
+        switch(c) {
+            case 'w':
+                stav_0++;
+                Serial.print("stav_0  ");
+                Serial.println(stav_0);
+                break;
+            case 's':
+                stav_0--;
+                Serial.print("stav_0  ");
+                Serial.println(stav_0);
+                break;
+            case 'a':
+                stav_1++;
+                Serial.print("stav_1  ");
+                Serial.println(stav_1);
+                break;
+            case 'd':
+                stav_1--;
+                Serial.print("stav_1  ");
+                Serial.println(stav_1);
+                break;
+            default:
+                Serial.write(c);
+        } 
+    }
+    rbc().servoBus().set(0,stav_0,100.f,1.5f); // stav 0 = 25/130
+    rbc().servoBus().set(1,stav_1,180.f,1.5f); // stav 1 = 180/80
+}
+//*************************************************
+void testovani_motoru()
+{
+   if(Serial.available()) {
+        char c = Serial.read();
+        switch(c) {
+            case 't':
+                if (position_servo >= 5)  position_servo = position_servo -5;               
+                servo.write(position_servo);
+                Serial.write(" 0: "); 
+                Serial.print(position_servo);
+                break;
+            case 'u':
+                if (position_servo <= 175)  position_servo = position_servo +5;               
+                servo.write(position_servo);
+                Serial.write(" 0: "); 
+                Serial.print(position_servo);
+                break;
+            case '+':
+                ++power_motor;
+                Serial.println(power_motor);
+                break;
+            case '-':
+                --power_motor;
+                Serial.println(power_motor);
+                break;
+            case 'w':
+                rbc().setMotors().power(LEFT_MOTOR, power_motor)
+                                 .power(RIGHT_MOTOR, power_motor)
+                                 .set();
+                break;
+            case 's':
+                rbc().setMotors().power(LEFT_MOTOR, -power_motor)
+                                 .power(RIGHT_MOTOR, -power_motor)
+                                 .set();
+                break;
+            case 'a':
+                rbc().setMotors().power(LEFT_MOTOR, -power_motor)
+                                 .power(RIGHT_MOTOR, power_motor)
+                                 .set();
+                break;
+            case 'd':
+                rbc().setMotors().power(LEFT_MOTOR, power_motor)
+                                 .power(RIGHT_MOTOR, -power_motor)
+                                 .set();
+                break;
+            case '*':
+                c = '0' + 10;
+            case '0' ... '9':
+                power_motor = (c - '0') * 10;
+                Serial.println(power_motor);
+                break;
+                rbc().motor(LEFT_MOTOR)->drive(otacka * (c - '0'), 64, nullptr);
+                rbc().motor(RIGHT_MOTOR)->drive(otacka * (c - '0'), 64, nullptr); //  tik; na otacku 
+                break;
+
+            case ' ':
+                rbc().setMotors().stop(LEFT_MOTOR)
+                                 .stop(RIGHT_MOTOR)
+                                 .set();
+                break; 
+
+            case 'i': vpred(1);
+                break;
+            case 'k': vpravo(1);
+                break;
+            case 'm': vpred(-1);
+                break;
+            case 'j': vlevo(1);
+                break;
+            case 'p': vpravo_na_miste(1);
+                break;
+                
+            default:
+                Serial.write(c);
+                break;
+        } 
+    }
+
 
 }

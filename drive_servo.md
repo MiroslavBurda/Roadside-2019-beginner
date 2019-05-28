@@ -27,7 +27,7 @@ void setup()
     Serial.begin (115200);
     rbc().initSmartServoBus(2, UART_NUM_1, GPIO_NUM_32);
     rbc().servoBus().limit(0, Angle::deg(25), Angle::deg(130)); // stav 0 = 25/130
-    rbc().servoBus().limit(1, Angle::deg(80), Angle::deg(180)); // stav 0 = 25/130
+    rbc().servoBus().limit(1, Angle::deg(80), Angle::deg(180)); // stav 1 = 180/80
 }
 
 void loop() 

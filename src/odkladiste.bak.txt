@@ -130,3 +130,11 @@ a.ok = ( ( ((levy >= 0) and (a.left_enc < 2)) or  ((levy <= 0) and (a.left_enc >
     //     SerialBT.println("***************** DESKA JE VYPNUTA !!!!!! ************************");
     //     SerialBT.println("***************** DESKA JE VYPNUTA !!!!!! ************************");
     // }    
+
+    
+            // case 'l':
+            //     rbc().motor(RIGHT_MOTOR)->drive(otacka, 45, nullptr); //  tik; na otacku 
+            //     break;
+            // case 'p':
+            //     rbc().motor(LEFT_MOTOR)->drive(otacka, 45, nullptr);
+            //     break;
