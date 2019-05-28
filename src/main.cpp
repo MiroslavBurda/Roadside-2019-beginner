@@ -50,10 +50,10 @@ void setup() {
     // rbc().servoBus().limit(0, 0_deg, 240_deg); // ID, minimalni, maximalni hodnota - toto se nastavuje pouze jednou
     // rbc().servoBus().set(0, 120_deg, 150); // ID, cilova poloha, rychlost, [zrychleni a zpomaleni na zacatku a konci pohybu, 1.f toto vypina]
 //**********************************************
-    // rbc().servoBus().limit(0, 25_deg, 130_deg); // stav 0 = 25/130
-    // rbc().servoBus().limit(1, 80_deg, 180_deg); // stav 1 = 180/80
-    // rbc().servoBus().set(0, 80, 150.f, 1.5f);
-    // rbc().servoBus().set(1, 120, 80.f, 1.5f);
+    rbc().servoBus().limit(0, 25_deg, 130_deg); // stav 0 = 25/130
+    rbc().servoBus().limit(1, 80_deg, 180_deg); // stav 1 = 180/80
+    rbc().servoBus().set(0, 80, 150.f, 1.5f);
+    rbc().servoBus().set(1, 120, 80.f, 1.5f);
 
     //rbc().servoBus().limit(0, Angle::deg(25), Angle::deg(130)); // stav 0 = 25/130
     //rbc().servoBus().limit(1, Angle::deg(80), Angle::deg(180)); // stav 1 = 180/80
@@ -110,7 +110,7 @@ void loop()
         // Serial.println(rbc().motor(RIGHT_MOTOR)->encoder()->value());
 
     }
-  //  testovani_serv();
+      testovani_serv();
  //   testovani_motoru();
 
     if ( read_joystick() )
