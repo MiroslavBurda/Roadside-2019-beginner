@@ -1,5 +1,29 @@
 
-    // rbc().schedule(100, casovac1); // je volaný každých 500 ms  
+// rb::Manager& rbc() 
+// {
+//    return rb::Manager::get();
+// }
+
+// rbc().install(rb::MAN_DISABLE_BATTERY_MANAGEMENT | rb::MAN_DISABLE_MOTOR_FAILSAFE);
+
+// rbc().schedule(200, vypis_IR);  // spusti casovac kazdych 200ms presne pomoci preruseni (ostatni veci pockaji)
+
+bool vypis_IR() {        // funkce pouzita do preruseni musi byt bool, musi vracet true, muze jich byt 10 a vice
+    // vypis hodnot na IR zleva do prava 
+    Serial.print("** ");
+    Serial.print(digitalRead(33));
+    Serial.print(" ");
+    Serial.print(digitalRead(5));
+    Serial.print(" ");
+    Serial.print(digitalRead(27));
+    Serial.print(" ");
+    Serial.print(digitalRead(26));
+    Serial.print(" ");
+    Serial.print(digitalRead(25));
+    Serial.print( !( digitalRead(33) and digitalRead(5) and digitalRead(27) and digitalRead(26) and digitalRead(25) ) ? " stop " : " ok " );
+    Serial.println(" **");
+    return true;
+}
 
      if (send_data) {
         send_data.ack();
@@ -138,3 +162,13 @@ a.ok = ( ( ((levy >= 0) and (a.left_enc < 2)) or  ((levy <= 0) and (a.left_enc >
             // case 'p':
             //     rbc().motor(LEFT_MOTOR)->drive(otacka, 45, nullptr);
             //     break;
+
+   // pocet serv (MUSI byt spravne), cislo  hardwarove seriove linky, pin, na kterém jsou serva připojena (všechna na jednom) IO14 by default
+    // ID je tady od 0, ale HW je od 1! - toto Hadrwarove ID se musi nastavit specialni destickou - pouze jednou 
+    // rbc().servoBus().limit(0, 0_deg, 240_deg); // ID, minimalni, maximalni hodnota - toto se nastavuje pouze jednou
+    // rbc().servoBus().set(0, 120_deg, 150); // ID, cilova poloha, rychlost, [zrychleni a zpomaleni na zacatku a konci pohybu, 1.f toto vypina]
+//**********************************************
+
+
+    //rbc().servoBus().limit(0, Angle::deg(25), Angle::deg(130)); // stav 0 = 25/130
+    //rbc().servoBus().limit(1, Angle::deg(80), Angle::deg(180)); // stav 1 = 180/80
