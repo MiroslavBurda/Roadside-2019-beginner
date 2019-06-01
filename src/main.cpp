@@ -433,6 +433,7 @@ void bateri_unloading(int bateri_number)
         delay(1000);
         rbc().motor(LEFT_MOTOR)->drive(-otacka * 0.5, 50, nullptr);
         rbc().motor(RIGHT_MOTOR)->drive(-otacka * 0.5, 50, nullptr);
+        delay(1000);
         rbc().servoBus().set(1,rb::Angle::deg(35),180.f,1.5f);
         delay(200);
     }
@@ -491,7 +492,7 @@ void bateri_unloading(int bateri_number)
         rbc().servoBus().set(0,rb::Angle::deg(100),100.f,15.0f);
         rbc().motor(RIGHT_MOTOR)->drive(-otacka * 1.5 , 50, nullptr);
         rbc().motor(LEFT_MOTOR )->drive(-otacka * 1.5 , 50, nullptr);
-        delay(1200);
+        delay(1000);
         rbc().servoBus().set(0,rb::Angle::deg(30),180.f,1.5f);
     }
     else if (bateri_number == 3)
