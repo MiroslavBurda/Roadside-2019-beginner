@@ -459,11 +459,11 @@ void bateri_unloading(int bateri_number)
         }
         rbc().servoBus().set(1,rb::Angle::deg(140),100.f,15.0f);
         delay(1000);
-        rbc().servoBus().set(1,rb::Angle::deg(175),100.f,15.0f);
+        rbc().servoBus().set(1,rb::Angle::deg(75),100.f,15.0f);
         rbc().motor(RIGHT_MOTOR)->drive(-otacka * 1.5 , 50, nullptr);
         rbc().motor(LEFT_MOTOR )->drive(-otacka * 1.5 , 50, nullptr);
         delay(1200);
-        rbc().servoBus().set(1,rb::Angle::deg(30),180.f,1.5f);
+        rbc().servoBus().set(1,rb::Angle::deg(35),180.f,1.5f);
     }
     else if (bateri_number == 2)
     {
@@ -486,9 +486,9 @@ void bateri_unloading(int bateri_number)
             rbc().motor(RIGHT_MOTOR)->drive(otacka*0.04547, 50, nullptr);
             delay(50);
         }
-        rbc().servoBus().set(0,rb::Angle::deg(140),100.f,15.0f);
+        rbc().servoBus().set(0,rb::Angle::deg(35),100.f,15.0f);
         delay(1000);
-        rbc().servoBus().set(0,rb::Angle::deg(175),100.f,15.0f);
+        rbc().servoBus().set(0,rb::Angle::deg(100),100.f,15.0f);
         rbc().motor(RIGHT_MOTOR)->drive(-otacka * 1.5 , 50, nullptr);
         rbc().motor(LEFT_MOTOR )->drive(-otacka * 1.5 , 50, nullptr);
         delay(1200);
@@ -515,13 +515,13 @@ void bateri_unloading(int bateri_number)
             rbc().motor(RIGHT_MOTOR)->drive(otacka*0.04547, 50, nullptr);
             delay(50);
         }
-        rbc().servoBus().set(0,rb::Angle::deg(140),100.f,15.0f);
+        rbc().servoBus().set(0,rb::Angle::deg(70),100.f,15.0f);
         delay(1000);
-        rbc().servoBus().set(0,rb::Angle::deg(175),100.f,15.0f);
+        rbc().servoBus().set(0,rb::Angle::deg(135),100.f,15.0f);
         rbc().motor(RIGHT_MOTOR)->drive(-otacka * 1.5 , 50, nullptr);
         rbc().motor(LEFT_MOTOR )->drive(-otacka * 1.5 , 50, nullptr);
         delay(1200);
-        rbc().servoBus().set(1,rb::Angle::deg(30),180.f,1.5f);
+        rbc().servoBus().set(1,rb::Angle::deg(175),180.f,1.5f);
     }
 }
 
