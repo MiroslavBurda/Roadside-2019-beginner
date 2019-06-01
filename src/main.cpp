@@ -17,7 +17,8 @@ void start();
 void testovani_serv();
 void testovani_motoru();
 bool read_joystick(); // definice dole pod hlavnim programem
-
+void ultrasounic_pinmode();
+int read_ultrasounic();
 
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
@@ -41,10 +42,10 @@ void setup() {
         Serial.println("!!! Bluetooth work!");
     }
     Serial.print ("Starting...\n");
-    rbc();
+    rbc().install(rb::ManagerInstallFlags::MAN_DISABLE_BATTERY_MANAGEMENT | rb::ManagerInstallFlags::MAN_DISABLE_MOTOR_FAILSAFE);
     auto& batt = rbc().battery();
     batt.setCoef(100.0);  
-    rbc().initSmartServoBus(2, UART_NUM_2, GPIO_NUM_14); // na portu 4 a 13 nefunguje, klasické servo na portu 4 taky nefunguje 
+    rbc().initSmartServoBus(2, UART_NUM_2, GPIO_NUM_4); // na portu 4 a 13 nefunguje, klasické servo na portu 4 taky nefunguje 
     rbc().servoBus().limit(0, 25_deg, 130_deg); // stav 0 = 25/130
     rbc().servoBus().limit(1, 80_deg, 180_deg); // stav 1 = 180/80
     Serial.print ("RBC initialized\n");
@@ -55,7 +56,8 @@ void setup() {
     pinMode(26, INPUT_PULLUP);
     pinMode(27, INPUT_PULLUP);
     pinMode(33, INPUT_PULLUP);
-    
+    ultrasounic_pinmode();
+
     Serial.print(rbc().motor(LEFT_MOTOR)->encoder()->value()); // cteni enkoderu
     Serial.print('\t');
     Serial.println(rbc().motor(RIGHT_MOTOR)->encoder()->value());
@@ -73,11 +75,11 @@ void setup() {
     Serial.print(rbc().motor(LEFT_MOTOR)->encoder()->value()); // cteni enkoderu
     Serial.print('\t');
     Serial.println(rbc().motor(RIGHT_MOTOR)->encoder()->value());
-    rbc().servoBus().set(0, 30, 150.f, 1.5f);
-    rbc().servoBus().set(1, 180, 150.f, 1.5f);
+    rbc().servoBus().set(0, rb::Angle::deg(30), 150.f, 1.5f);
+    rbc().servoBus().set(1, rb::Angle::deg(180), 150.f, 1.5f);
     delay(500);
-    rbc().servoBus().set(0, 130, 50.f, 1.5f);
-    rbc().servoBus().set(1, 80, 50.f, 1.5f);
+    rbc().servoBus().set(0, rb::Angle::deg(130), 50.f, 1.5f);
+    rbc().servoBus().set(1, rb::Angle::deg(80), 50.f, 1.5f);
     poloha_0 = 130;
     poloha_1 = 80;
     
@@ -98,31 +100,31 @@ void loop()
  //     testovani_serv();  // pozor, kdyz je zapnuto, rusi ostatni ovladani serv 
  //   testovani_motoru();
 
-    if ( read_joystick() )
-    {
-        float axis_0 = (abs(axis[0]) < 1) ? 0 : axis[0] /128.0; 
+    if ( read_joystick() ) {
+        float axis_0 = (abs(axis[0]) < 3) ? 0 : axis[0] /128.0; 
         axis_0 = axis_0*axis_0*axis_0;
-        float axis_1 = (abs(axis[1]) < 1) ? 0 : axis[1] /128.0; 
+        float axis_1 = (abs(axis[1]) < 3) ? 0 : axis[1] /128.0; 
         axis_1 = axis_1*axis_1*axis_1;
-        int levy_m = (axis_1- (axis_0 /2 )) * speed_coef;
-        int pravy_m = (axis_1+ (axis_0 /2 )) * speed_coef;
+        int levy_m = (axis_1 - (axis_0 /2 )) * speed_coef;
+        int pravy_m = (axis_1 + (axis_0 /2 )) * speed_coef;
         printf(" %i %i \n ", levy_m, pravy_m );
         rbc().setMotors().power(LEFT_MOTOR, levy_m)
                          .power(RIGHT_MOTOR, pravy_m)
                          .set();
+
         if (axis[5] > 100 ) // pouze zapnuto/vypnuto
         {
-            rbc().servoBus().set(0, 35, 300.f, 1.5f);
-            rbc().servoBus().set(1, 175, 300.f, 1.5f);
+            rbc().servoBus().set(0, rb::Angle::deg(35), 300.f, 1.5f);
+            rbc().servoBus().set(1, rb::Angle::deg(30), 300.f, 1.5f);
             poloha_0 = 35;
             poloha_1 = 175;
         }
         if (axis[5] < -100 ) // pouze zapnuto/vypnuto
         {
-            rbc().servoBus().set(0, 130, 300.f, 1.5f);
-            rbc().servoBus().set(1, 80, 300.f, 1.5f);
-            poloha_0 = 130;
-            poloha_1 = 80;
+            rbc().servoBus().set(0, rb::Angle::deg(100), 300.f, 1.5f);
+            rbc().servoBus().set(1, rb::Angle::deg(50), 300.f, 1.5f);
+            poloha_0 = 100;
+            poloha_1 = 110;
         }
         float rychlost = (-axis[2]+129)/128.0;
         if (btn[5] == 1 )
@@ -142,13 +144,12 @@ void loop()
         Serial.print(poloha_0); Serial.print(" "); 
         Serial.print(poloha_1); Serial.print(" ");
         SerialBT.print(levy_m); SerialBT.print(" "); SerialBT.println(pravy_m);
-    }
+    }  
     poloha_0 = trim(poloha_0 + rychlost_0, 25, 130);
     poloha_1 = trim(poloha_1 + rychlost_1, 80, 180);
-    rbc().servoBus().set(0, poloha_0, 200.f, 1.5f);
-    rbc().servoBus().set(1, poloha_1, 200.f, 1.5f);
+    rbc().servoBus().set(0, rb::Angle::deg(poloha_0), 200.f, 1.5f);
+    rbc().servoBus().set(1, rb::Angle::deg(poloha_1), 200.f, 1.5f);
     delay(10);
- 
 }
 // ************************ definice, ktere jinde nefunguji 
 
@@ -168,6 +169,56 @@ void start()
 
 // ********************************************************************
 
+// bool read_joystick()
+// {
+//     if ( SerialBT.available() == 0 )
+//         return false;
+
+//     int test = SerialBT.read();
+//     if (test == 0x80)
+//     {
+//         int axis_count = SerialBT.read();
+//         for (int x = 0; x < axis_count; x++)
+//         {
+//             while(SerialBT.available() < 1)
+//             {
+//                 // DO NOTHING - WAITING FOR PACKET
+//                 delay(1);
+//             }
+
+//             int8_t tmp = SerialBT.read();
+//             axis[x] = tmp;
+//             Serial.print(x);  
+//             Serial.print(": ");
+//             Serial.print(axis[x], DEC);
+//             Serial.print(" ");
+//             SerialBT.print(x);
+//             SerialBT.print(": ");
+//             SerialBT.print(axis[x], DEC);
+//             SerialBT.print(" ");
+
+//         }
+//         return true;
+//     }
+//     else if  ( test == 0x81 )
+//     {
+//         while(SerialBT.available() < 1) {
+//             // DO NOTHING - WAITING FOR PACKET
+//             delay(1);
+//         }
+//         byte a = SerialBT.read();
+//         while(SerialBT.available() < 1) {
+//             // DO NOTHING - WAITING FOR PACKET
+//             delay(1);
+//         }
+//         btn_last[a] = btn[a];
+//         btn[a] = SerialBT.read();
+//         Serial.print(a, DEC); Serial.print(": "); Serial.print(btn[a], DEC); Serial.print("last: "); Serial.print(btn_last[a], DEC);
+//         return true;
+//     }
+//     return false;
+// }
+
 bool read_joystick()
 {
     if ( SerialBT.available() == 0 )
@@ -175,29 +226,45 @@ bool read_joystick()
 
     int test = SerialBT.read();
     if (test == 0x80)
-    {
+    {   
+        while(SerialBT.available() < 1)
+                {
+                    // DO NOTHING - WAITING FOR PACKET
+                    delay(1);
+                }
         int axis_count = SerialBT.read();
-        for (int x = 0; x < axis_count; x++)
+        Serial.print("axis_count: "); Serial.println(axis_count);
+        if (axis_count >= AXIS_COUNT)
         {
-            while(SerialBT.available() < 1)
-            {
-                // DO NOTHING - WAITING FOR PACKET
-                delay(1);
-            }
-
-            int8_t tmp = SerialBT.read();
-            axis[x] = tmp;
-            Serial.print(x);  
-            Serial.print(": ");
-            Serial.print(axis[x], DEC);
-            Serial.print(" ");
-            SerialBT.print(x);
-            SerialBT.print(": ");
-            SerialBT.print(axis[x], DEC);
-            SerialBT.print(" ");
-
+            Serial.println("********* CHYBA V POCTU OS !!! ************");
         }
-        return true;
+        else
+        {
+            for (int x = 0; x < axis_count; x++)
+            {
+                while(SerialBT.available() < 1)
+                {
+                    // DO NOTHING - WAITING FOR PACKET
+                    delay(1);
+                }
+
+                int8_t tmp = SerialBT.read();
+                axis[x] = tmp;
+                Serial.print(x);  
+                Serial.print(": ");
+                Serial.print(axis[x], DEC);
+                Serial.print(" ");
+                SerialBT.print(x);
+                SerialBT.print(": ");
+                SerialBT.print(axis[x], DEC);
+                
+
+            }
+            SerialBT.println(" ");
+            return true;
+        }
+        
+        
     }
     else if  ( test == 0x81 )
     {
@@ -206,18 +273,26 @@ bool read_joystick()
             delay(1);
         }
         byte a = SerialBT.read();
-        while(SerialBT.available() < 1) {
-            // DO NOTHING - WAITING FOR PACKET
-            delay(1);
+        if ( a >= BTN_COUNT )
+        {
+            Serial.println("********* CHYBA V POCTU TLACITEK !!! ************");
         }
-        btn_last[a] = btn[a];
-        btn[a] = SerialBT.read();
-        Serial.print(a, DEC); Serial.print(": "); Serial.print(btn[a], DEC); Serial.print("last: "); Serial.print(btn_last[a], DEC);
-        return true;
+        else 
+        {
+            while(SerialBT.available() < 1) {
+                // DO NOTHING - WAITING FOR PACKET
+                delay(1);
+            }
+            btn_last[a] = btn[a];
+            btn[a] = SerialBT.read();
+            Serial.print(a, DEC); Serial.print(": "); Serial.print(btn[a], DEC); Serial.print("last: "); Serial.print(btn_last[a], DEC);
+            return true;
+        }
+
     }
     return false;
 }
-//******************************************
+// //******************************************
 void testovani_serv()
 {
 
@@ -248,8 +323,8 @@ void testovani_serv()
                 Serial.write(c);
         } 
     }
-    rbc().servoBus().set(0,poloha_0,100.f,1.5f); // stav 0 = 25/130
-    rbc().servoBus().set(1,poloha_1,180.f,1.5f); // stav 1 = 180/80
+    rbc().servoBus().set(0,rb::Angle::deg(poloha_0),100.f,1.5f); // stav 0 = 25/130
+    rbc().servoBus().set(1,rb::Angle::deg(poloha_0),180.f,1.5f); // stav 1 = 180/80
 }
 //*************************************************
 void testovani_motoru()
@@ -311,4 +386,10 @@ void testovani_motoru()
     }
 
 
+}
+
+void ultrasounic_pinmode()
+{
+    pinMode(Echo, INPUT);
+    pinMode(Trig, OUTPUT);
 }

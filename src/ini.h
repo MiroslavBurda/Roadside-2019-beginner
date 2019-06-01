@@ -15,9 +15,11 @@ float poloha_0 = 80;
 float poloha_1 = 120;
 float rychlost_0 = 0;
 float rychlost_1 = 0;
-int axis[7] = {5,6,7,8,9,10,11};
-byte btn[13] = {0,0,0,0,0,0,0,0,0,0,0,0,0};
-byte btn_last[13] = {0,0,0,0,0,0,0,0,0,0,0,0,0};
+const int AXIS_COUNT = 7;
+const int BTN_COUNT = 13;
+int axis[AXIS_COUNT] = {5,6,7,8,9,10,11};
+byte btn[BTN_COUNT] = {0,0,0,0,0,0,0,0,0,0,0,0,0};
+byte btn_last[BTN_COUNT] = {0,0,0,0,0,0,0,0,0,0,0,0,0};
 int speed_coef = -100; // nasobeni hodnoty, co leze z joysticku
 int diff_coef = 1; // o kolik jede jeden motor rychleji nez druhy 
 
@@ -36,8 +38,7 @@ struct Driven {
 
 rb::Manager& rbc()
 {
-    static rb::Manager m(false,false);  // ve výchozím stavu se motory po puštění tlačítka vypínají, false zařídí, že pojedou, dokud nedostanou další pokyn
-    return m;
+    return rb::Manager::get();
 }
 
 bool sw1() { return !rbc().expander().digitalRead(rb::SW1); }
@@ -53,3 +54,5 @@ float trim(float value, float min, float max)
     return value;
 }
 
+gpio_num_t Trig = GPIO_NUM_18;
+gpio_num_t Echo = GPIO_NUM_14;

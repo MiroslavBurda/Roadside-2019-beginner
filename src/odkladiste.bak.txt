@@ -172,3 +172,181 @@ a.ok = ( ( ((levy >= 0) and (a.left_enc < 2)) or  ((levy <= 0) and (a.left_enc >
 
     //rbc().servoBus().limit(0, Angle::deg(25), Angle::deg(130)); // stav 0 = 25/130
     //rbc().servoBus().limit(1, Angle::deg(80), Angle::deg(180)); // stav 1 = 180/80
+
+//**********************************************//**********************************************
+//**********************************************
+//**********************************************
+//**********************************************
+//**********************************************
+
+
+ // {
+    //     bool axis_mark[4];
+
+    //     int8_t speed_l;
+    //     int8_t speed_r;
+
+    //     float end_axis[2];
+    
+
+    //     if(axis[0]<0)
+    //     {
+    //         axis_mark[0] = false;
+    //         end_axis[0] = -((axis[0]/128.0)*(axis[0]/128.0)*(axis[0]/128.0));
+    //     }
+    //     else
+    //     {
+    //         axis_mark[0] = true;
+    //         end_axis[0] = ((axis[0]/128.0)*(axis[0]/128.0)*(axis[0]/128.0));
+    //     }
+        
+    //     if(axis[1]<0)
+    //     {
+    //         axis_mark[1] = false;
+    //         end_axis[1] = -((axis[1]/128.0)*(axis[1]/128.0)*(axis[1]/128.0));
+    //         if(!axis_mark[0])
+    //         {
+    //             Serial.println("K 3");
+    //             if(end_axis[1]+end_axis[0]<=1)
+    //             {
+    //                 speed_l = -(end_axis[1]+end_axis[0])*100;
+    //                 rbc().setMotors().power(LEFT_MOTOR, speed_l);
+    //             }
+    //             else
+    //             {
+    //                 rbc().setMotors().power(LEFT_MOTOR, -100);
+    //             }                    
+    //         }
+    //         else
+    //         {
+    //             Serial.println("K 4");
+
+    //             speed_l = (end_axis[0]-end_axis[1])*100;
+    //             rbc().setMotors().power(LEFT_MOTOR, speed_l);
+    //         }
+    //     }
+    //     else
+    //     {
+    //         axis_mark[1] = true;
+    //         end_axis[1] = ((axis[1]/128.0)*(axis[1]/128.0)*(axis[1]/128.0));
+    //         if(!axis_mark[0])
+    //         {
+    //             Serial.println("K 2");
+
+    //             if(end_axis[1]-end_axis[0]<=1)
+    //             {
+    //                 speed_l = (end_axis[1]-end_axis[0])*100;
+    //                 rbc().setMotors().power(LEFT_MOTOR, speed_l);
+    //             }
+    //             else
+    //             {
+    //                 rbc().setMotors().power(LEFT_MOTOR, 100);
+    //             }                    
+    //         }
+    //         else
+    //         {
+    //             if(end_axis[1]+end_axis[0]<=1)
+    //             {
+    //                 Serial.println("K 1");
+    //                 axis_mark[2] = false;
+    //                 speed_l = (end_axis[1]+end_axis[0])*100;
+    //                 rbc().setMotors().power(LEFT_MOTOR, speed_l);
+    //             }
+    //             else
+    //             {
+    //                 axis_mark[2] = false;
+    //                 rbc().setMotors().power(LEFT_MOTOR, 100);
+    //             }
+    //         }
+    //     }
+
+    //     if(axis[1]<0)
+    //     {
+    //         axis_mark[1] = false;
+    //         end_axis[1] = -((axis[1]/128.0)*(axis[1]/128.0)*(axis[1]/128.0));
+    //         if(!axis_mark[0])
+    //         {
+    //             speed_r = (end_axis[0]-end_axis[1])*100;
+    //             rbc().setMotors().power(RIGHT_MOTOR, speed_r);                 
+    //         }
+    //         else
+    //         {
+    //             if(end_axis[1]-end_axis[0]<=1)
+    //             {
+    //                 axis_mark[2] = false;
+    //                 speed_r = -(end_axis[1]+end_axis[0])*100;
+    //                 rbc().setMotors().power(RIGHT_MOTOR, speed_r);
+    //             }
+    //             else
+    //             {
+    //                 axis_mark[2] = false;
+    //                 rbc().setMotors().power(RIGHT_MOTOR, -100);
+    //             }
+    //         }
+    //     }
+    //     else
+    //     {
+    //         axis_mark[1] = true;
+    //         end_axis[1] = ((axis[1]/128.0)*(axis[1]/128.0)*(axis[1]/128.0));
+    //         if(!axis_mark[0])
+    //         {
+    //             if(end_axis[1]+end_axis[0]<=1)
+    //             {
+    //                 speed_r = (end_axis[1]+end_axis[0])*100;
+    //                 rbc().setMotors().power(RIGHT_MOTOR, speed_r);
+    //             }
+    //             else
+    //             {
+    //                 rbc().setMotors().power(RIGHT_MOTOR, 100);
+    //             }                    
+    //         }
+    //         else
+    //         {
+    //             if(end_axis[1]-end_axis[0]<=1)
+    //             {
+    //                 axis_mark[2] = false;
+    //                 speed_r = (end_axis[1]-end_axis[0])*100;
+    //                 rbc().setMotors().power(RIGHT_MOTOR, speed_r);
+    //             }
+    //             else
+    //             {
+    //                 axis_mark[2] = false;
+    //                 rbc().setMotors().power(RIGHT_MOTOR, 100);
+    //             }
+    //         }
+    //     }
+    //     rbc().setMotors().set();
+        
+    //     if (axis[5] > 100 ) // pouze zapnuto/vypnuto
+    //     {
+    //         rbc().servoBus().set(0, 35, 300.f, 1.5f);
+    //         rbc().servoBus().set(1, 175, 300.f, 1.5f);
+    //         poloha_0 = 35;
+    //         poloha_1 = 175;
+    //     }
+    //     if (axis[5] < -100 ) // pouze zapnuto/vypnuto
+    //     {
+    //         rbc().servoBus().set(0, 130, 300.f, 1.5f);
+    //         rbc().servoBus().set(1, 80, 300.f, 1.5f);
+    //         poloha_0 = 130;
+    //         poloha_1 = 80;
+    //     }
+    //     float rychlost = (-axis[2]+129)/128.0;
+    //     if (btn[5] == 1 )
+    //         rychlost_0 = rychlost;
+    //     else if (btn[6] == 1 )
+    //          rychlost_0 = -rychlost;
+    //     else
+    //         rychlost_0 =0;
+
+    //     if (btn[8] == 1 )
+    //         rychlost_1 = rychlost;
+    //     else if (btn[7] == 1 )
+    //          rychlost_1 = -rychlost;
+    //     else
+    //         rychlost_1 =0;
+
+    //     Serial.print(poloha_0); Serial.print(" "); 
+    //     Serial.print(poloha_1); Serial.print(" ");
+    // }
+
