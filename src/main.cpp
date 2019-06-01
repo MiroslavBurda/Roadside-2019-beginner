@@ -17,8 +17,10 @@ void start();
 void testovani_serv();
 void testovani_motoru();
 bool read_joystick(); // definice dole pod hlavnim programem
+
+void bateri_unloading(int bateri_number);
 void ultrasounic_pinmode();
-int read_ultrasounic();
+float read_ultrasounic();
 
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
@@ -144,7 +146,23 @@ void loop()
         Serial.print(poloha_0); Serial.print(" "); 
         Serial.print(poloha_1); Serial.print(" ");
         SerialBT.print(levy_m); SerialBT.print(" "); SerialBT.println(pravy_m);
-    }  
+    }
+    if(btn[9])
+    {
+        bateri_unloading(0);   
+    }
+    if(btn[10])
+    {
+        bateri_unloading(1);   
+    }
+    if(btn[11])
+    {
+        bateri_unloading(2);   
+    }
+    if(btn[12])
+    {
+        bateri_unloading(3);   
+    }
     poloha_0 = trim(poloha_0 + rychlost_0, 25, 130);
     poloha_1 = trim(poloha_1 + rychlost_1, 80, 180);
     rbc().servoBus().set(0, rb::Angle::deg(poloha_0), 200.f, 1.5f);
@@ -388,8 +406,142 @@ void testovani_motoru()
 
 }
 
+void bateri_unloading(int bateri_number)
+{
+    if (bateri_number == 0)
+    {
+        rbc().setMotors().power(RIGHT_MOTOR, 60)
+                         .power(LEFT_MOTOR, 60)
+                         .set();
+        delay(1500);
+        rbc().motor(LEFT_MOTOR )->drive(-otacka*0.5, 60, nullptr);
+        rbc().motor(RIGHT_MOTOR)->drive(-otacka*0.5, 60, nullptr);
+        delay(1000);
+        while (read_ultrasounic()<13)
+        {
+            rbc().motor(LEFT_MOTOR )->drive(-otacka*0.04547, 40, nullptr);
+            rbc().motor(RIGHT_MOTOR)->drive(-otacka*0.04547, 40, nullptr);
+            delay(50);
+        }
+        while(read_ultrasounic()>13.5)
+        {
+            rbc().motor(LEFT_MOTOR )->drive(otacka*0.04547, 40, nullptr);
+            rbc().motor(RIGHT_MOTOR)->drive(otacka*0.04547, 40, nullptr);
+            delay(50);
+        }
+        rbc().servoBus().set(1,rb::Angle::deg(175),180.f,1.5f);
+        delay(1000);
+        rbc().motor(LEFT_MOTOR)->drive(-otacka * 0.5, 50, nullptr);
+        rbc().motor(RIGHT_MOTOR)->drive(-otacka * 0.5, 50, nullptr);
+        rbc().servoBus().set(1,rb::Angle::deg(35),180.f,1.5f);
+        delay(200);
+    }
+    else if (bateri_number == 1)
+    {
+        rbc().setMotors().power(RIGHT_MOTOR, 60)
+                         .power(LEFT_MOTOR, 60)
+                         .set();
+        delay(1500);
+        rbc().motor(LEFT_MOTOR )->drive(-otacka*0.5, 60, nullptr);
+        rbc().motor(RIGHT_MOTOR)->drive(-otacka*0.5, 60, nullptr);
+        delay(1000);
+        while (read_ultrasounic()<4.3)
+        {
+            rbc().motor(LEFT_MOTOR )->drive(-otacka*0.04547, 50, nullptr);
+            rbc().motor(RIGHT_MOTOR)->drive(-otacka*0.04547, 50, nullptr);
+            delay(50);
+        }
+        while(read_ultrasounic()>4.5)
+        {
+            rbc().motor(LEFT_MOTOR )->drive(otacka*0.04547, 50, nullptr);
+            rbc().motor(RIGHT_MOTOR)->drive(otacka*0.04547, 50, nullptr);
+            delay(50);
+        }
+        rbc().servoBus().set(1,rb::Angle::deg(140),100.f,15.0f);
+        delay(1000);
+        rbc().servoBus().set(1,rb::Angle::deg(175),100.f,15.0f);
+        rbc().motor(RIGHT_MOTOR)->drive(-otacka * 1.5 , 50, nullptr);
+        rbc().motor(LEFT_MOTOR )->drive(-otacka * 1.5 , 50, nullptr);
+        delay(1200);
+        rbc().servoBus().set(1,rb::Angle::deg(30),180.f,1.5f);
+    }
+    else if (bateri_number == 2)
+    {
+        rbc().setMotors().power(RIGHT_MOTOR, 60)
+                         .power(LEFT_MOTOR, 60)
+                         .set();
+        delay(1500);
+        rbc().motor(LEFT_MOTOR )->drive(-otacka*0.5, 60, nullptr);
+        rbc().motor(RIGHT_MOTOR)->drive(-otacka*0.5, 60, nullptr);
+        delay(1000);
+        while (read_ultrasounic()<4.3)
+        {
+            rbc().motor(LEFT_MOTOR )->drive(-otacka*0.04547, 50, nullptr);
+            rbc().motor(RIGHT_MOTOR)->drive(-otacka*0.04547, 50, nullptr);
+            delay(50);
+        }
+        while(read_ultrasounic()>4.5)
+        {
+            rbc().motor(LEFT_MOTOR )->drive(otacka*0.04547, 50, nullptr);
+            rbc().motor(RIGHT_MOTOR)->drive(otacka*0.04547, 50, nullptr);
+            delay(50);
+        }
+        rbc().servoBus().set(0,rb::Angle::deg(140),100.f,15.0f);
+        delay(1000);
+        rbc().servoBus().set(0,rb::Angle::deg(175),100.f,15.0f);
+        rbc().motor(RIGHT_MOTOR)->drive(-otacka * 1.5 , 50, nullptr);
+        rbc().motor(LEFT_MOTOR )->drive(-otacka * 1.5 , 50, nullptr);
+        delay(1200);
+        rbc().servoBus().set(0,rb::Angle::deg(30),180.f,1.5f);
+    }
+    else if (bateri_number == 3)
+    {
+        rbc().setMotors().power(RIGHT_MOTOR, 60)
+                         .power(LEFT_MOTOR, 60)
+                         .set();
+        delay(1500);
+        rbc().motor(LEFT_MOTOR )->drive(-otacka*0.5, 60, nullptr);
+        rbc().motor(RIGHT_MOTOR)->drive(-otacka*0.5, 60, nullptr);
+        delay(1000);
+        while (read_ultrasounic()<4.3)
+        {
+            rbc().motor(LEFT_MOTOR )->drive(-otacka*0.04547, 50, nullptr);
+            rbc().motor(RIGHT_MOTOR)->drive(-otacka*0.04547, 50, nullptr);
+            delay(50);
+        }
+        while(read_ultrasounic()>4.5)
+        {
+            rbc().motor(LEFT_MOTOR )->drive(otacka*0.04547, 50, nullptr);
+            rbc().motor(RIGHT_MOTOR)->drive(otacka*0.04547, 50, nullptr);
+            delay(50);
+        }
+        rbc().servoBus().set(0,rb::Angle::deg(140),100.f,15.0f);
+        delay(1000);
+        rbc().servoBus().set(0,rb::Angle::deg(175),100.f,15.0f);
+        rbc().motor(RIGHT_MOTOR)->drive(-otacka * 1.5 , 50, nullptr);
+        rbc().motor(LEFT_MOTOR )->drive(-otacka * 1.5 , 50, nullptr);
+        delay(1200);
+        rbc().servoBus().set(1,rb::Angle::deg(30),180.f,1.5f);
+    }
+}
+
 void ultrasounic_pinmode()
 {
     pinMode(Echo, INPUT);
     pinMode(Trig, OUTPUT);
+}
+
+float read_ultrasounic()
+{
+    digitalWrite(Trig, LOW); 
+    delayMicroseconds(2); 
+    digitalWrite(Trig, HIGH); 
+    delayMicroseconds(10); 
+    digitalWrite(Trig, LOW); // Spočítá vzdálenost 
+    float distance = pulseIn(Echo, HIGH); 
+    distance = distance*0.017315f; // odešle informace na sérivý port 
+    Serial.print(distance); 
+    Serial.print("cm\n");
+    delay(200);
+    return distance;
 }
